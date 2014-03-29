@@ -80,7 +80,7 @@ int main() {
 
 	int i = 0;
 	
-	//while(!infile.eof()) {
+	///while(!infile.eof()) {
 	for(i = 0; i < 7531; i++) {
 		getline(file, line);
 		std::vector<std::string> x = split(line, '\t');
