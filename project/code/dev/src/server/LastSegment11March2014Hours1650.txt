@@ -1,0 +1,1 @@
+<segment latNew="17.4988072" longNew="78.4024252" latOld="17.4988139" longOld="78.4024195"/>

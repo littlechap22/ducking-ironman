@@ -1,0 +1,7 @@
+<?php
+
+class dbConfig
+mysql_connect("localhost", "littlechap22", "some_pass") or die(mysql_error());
+mysql_select_db("projectm") or die (mysql_error());
+
+?>

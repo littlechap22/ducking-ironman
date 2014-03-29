@@ -1,0 +1,142 @@
+#include<algorithm>
+#include<cctype>
+#include<cstring>
+#include<fstream>
+#include<functional>
+#include<iostream>
+#include<locale>
+#include<math.h>
+#include<sstream>
+#include<stdlib.h>
+#include<string>
+#include<vector>
+
+#include</var/www/project/datasets/headers/UTM.h>
+using namespace std;
+
+std::vector<std::string> &split(const std::string &s, char delim, std::vector<std::string> &elems) {
+
+	std::stringstream ss(s);
+	std::string item;
+	while(std::getline(ss, item, delim)) {
+		elems.push_back(item);
+	}
+	return elems;
+}
+
+std::vector<std::string> split(const std::string &s, char delim) {
+	std::vector<std::string> elems;
+	split(s, delim, elems);
+	return elems;
+}
+
+//trim from start
+static inline std::string &ltrim(std::string &s) {
+	
+	s.erase(s.begin(), std::find_if(s.begin(), s.end(), std::not1(std::ptr_fun<int, int>(std::isspace))));
+	return s;
+}
+
+//trim from end
+
+static inline std::string &rtrim(std::string &s) {
+	s.erase(std::find_if(s.rbegin(), s.rend(), std::not1(std::ptr_fun<int, int>(std::isspace))).base(), s.end());
+	return s;
+}
+
+static inline std::string &trim(std::string &s) {
+	return ltrim(rtrim(s));
+}
+
+int main() {
+
+	string line;
+
+	ifstream infile;
+//	infile.open("gps_data.txt");
+//
+//	if(!infile) {
+//		cout << "Error: No input file\n";
+//		return 1;
+//	}
+//
+//	double input[10000][2];
+//	double UTMLatLng[10000][2];
+//	int col = 0;
+//	int row = 0;
+//	double lat;
+//	double lng;
+//
+//	double UTMNorthing;
+//	double UTMEasting;
+//	char UTMZone[50];
+//
+//	const char *n;
+//	string num;
+//
+//	//while(!infile.eof()) {
+//	for(int i = 0; i < 7531; i++) {
+//		getline(infile, line);
+//		std::vector<std::string> x = split(line, '\t');
+//
+//		for(int j = 2; j < 4; j++) {
+//			num = x[j];
+//			n = num.c_str();
+//			input[row][col] = atof(n);
+//			col++;
+//		}
+//		UTM::LLtoUTM(input[row][0], input[row][1], UTMNorthing, UTMEasting, UTMZone);
+//		UTMLatLng[row][0] = UTMNorthing;
+//		UTMLatLng[row][1] = UTMEasting;
+//		row++;
+//		col = 0;
+//		cout << row << "\n";
+//	}
+//	infile.close();
+
+
+	infile.open("road_network.txt");
+
+	if(!infile) {
+		cout << "Error: No input file\n";
+		return 1;
+	}
+
+	char unwantedChars[] = "LINESTRING()";
+	string segment;
+	
+	//TODO: create dynamic memory allocation
+	double roadSegments[100000][4];
+	int index = 0;
+
+	//for(int i = 0; i < 158167; i++) {
+	for(int i = 0; i < 10000; i++) {
+		getline(infile, line);
+		std::vector<std::string> x = split(line, '\t');
+
+		segment = x[6];
+		for(int j = 0; j < strlen(unwantedChars); j++) {
+			segment.erase(std::remove(segment.begin(), segment.end(), unwantedChars[j]), segment.end());
+		}
+		std::vector<std::string> smallerSegments = split(segment, ',');
+
+		for(int j = 0; j < smallerSegments.size()-1; j++) {
+			std::vector<std::string> startLatLng = split(trim(smallerSegments[j]), ' ');
+			std::vector<std::string> endLatLng = split(trim(smallerSegments[j+1]), ' ');
+			roadSegments[index][0] = atof(startLatLng[0].c_str());
+			roadSegments[index][1] = atof(startLatLng[1].c_str());
+			roadSegments[index][2] = atof(endLatLng[0].c_str());
+			roadSegments[index][3] = atof(endLatLng[1].c_str());
+			index++;
+		}
+	}
+	//TODO: get back the precision of the latitude and longitudes
+	infile.close();
+
+	double UTMNorthing;
+	double UTMEasting;
+	char UTMZone[50];
+	double roadSegmentsUTM[100000][4];
+
+	return 0;
+}

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+<meta charset="utf-8">
+<title>Test Data</title>
+<style>
+html, body, #map-canvas {
+height: 100%;
+margin: 0px;
+padding: 0px
+}
+</style>
+<script type="text/javascript" src="./js/jquery-1.11.0.min.js"></script>
+<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false"></script>
+<script type="text/javascript">
+var latLonData;
+
+function GetColor(speed) {
+	var color;
+	if (speed < 20 ) {
+		color = "#DF0101";
+	} else if (speed >= 20 && speed < 40) {
+		color = "#FF8000";
+	} else {
+		color = "#3ADF00";
+	}
+
+	return color;
+}
+
+
+function GetData() {
+	jQuery.ajax({
+		type: "POST"
+		, url: "../server/UtilityHandler.php"
+		, dataType: "html"
+		, async: false
+		, success: function(data) {
+			latLonData = jQuery.parseJSON(data);
+		}
+	});
+}
+
+
+function OverlayDataOnMap() {
+	var mapOptions = {
+		zoom: 14,
+		//kothaguda junction 17.459044,78.366165
+      		center: new google.maps.LatLng(17.459044, 78.366165),
+      		mapTypeId: google.maps.MapTypeId.ROADMAP //SATELLITE, HYBRID, TERRAIN
+	};
+
+	var map = new google.maps.Map(document.getElementById('map-canvas'),
+			mapOptions);
+
+	var segmentsArray = new Array();
+	for(var i = 0; i < latLonData.length; i++) {
+		
+		var piece = latLonData[i];
+
+		var segment = [
+			new google.maps.LatLng(piece.oldLat, piece.oldLon),
+		    	new google.maps.LatLng(piece.newLat, piece.newLon)
+		];
+		
+		segmentColor = GetColor(piece.speed);
+
+		var segmentPolyline = new google.maps.Polyline({
+			path: segment,
+			geodesic: true,
+			strokeColor: segmentColor,
+			strokeOpacity: 1.0,
+			strokeWeight: 2
+		});
+
+		segmentsArray.push(segmentPolyline);
+	}
+	
+	for(var i = 0; i < segmentsArray.length; i++) {
+		segmentsArray[i].setMap(map);
+	}
+}
+
+
+function ShowData() {
+	GetData();
+	OverlayDataOnMap();
+}
+
+google.maps.event.addDomListener(window, 'load', ShowData);
+
+</script>
+</head>
+<body>
+<div id="map-canvas"></div>
+</body>
+</html>
