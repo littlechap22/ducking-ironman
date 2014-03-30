@@ -1,0 +1,18 @@
+#include <iostream>
+#include <stdlib.h>
+#include <stddef.h>
+#include <string.h>
+
+#include "jsoncpp\include\json\json.h"
+
+int main(int argc, char **argv)
+{
+
+	std::string example = "{\"array\":[\"item1\", \"item2\"], \"not an array\":\"asdf\"}";
+	Json::Value value;
+	Json::Reader reader;
+
+	bool parsed = reader.parse(example, value, false);
+	std::cout << parsed;
+	return 0;
+}
