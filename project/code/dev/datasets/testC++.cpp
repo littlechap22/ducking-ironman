@@ -13,7 +13,9 @@
 #include<string>
 #include<vector>
 
-#include</var/www/project/datasets/headers/UTM.h>
+#include</var/www/project/code/dev/datasets/headers/UTM.h>
+#include</var/www/project/code/dev/datasets/rapidjson/document.h>
+//#include<./headers/UTM.h>
 using namespace std;
 
 //TODO: move to string library
@@ -54,6 +56,15 @@ static inline std::string &trim(std::string &s) {
 int main() {
         cout << std::setprecision(std::numeric_limits<long double>::digits10);
         cout << std::setprecision(std::numeric_limits<double>::digits10);
+
+
+	std::ifstream ifs("road.json");
+	std:string content( (std::istreambuf_iterator<char>(ifs) ), 
+				(std::istreambuf_iterator<char>() ));
+
+	cout << content << "\n";
+	exit(0);
+
 
 	ifstream file;
 	char gpsFilename[25] = "gps_data.txt";
