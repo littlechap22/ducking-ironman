@@ -20,8 +20,11 @@ to date with any necessary changes -->
 //var lat = 53.7931
 //var lon = 19.7791
 //9583 - malaysia
-var lat = 6.12243
-var lon = 100.382
+//var lat = 6.12243
+//var lon = 100.382
+//seattle
+var lat = 47.6245571
+var lon = -122.0908841
 var zoom= 13
 
 var map; //complex object of type OpenLayers.Map
@@ -55,7 +58,8 @@ var lgpx = new OpenLayers.Layer.Vector("Lakeside cycle ride", {
 strategies: [new OpenLayers.Strategy.Fixed()],
 protocol: new OpenLayers.Protocol.HTTP({
 //url: "./1669614.gpx",
-url: "./malaysia.gpx",
+//url: "./malaysia.gpx",
+url: "./output.gpx",
 format: new OpenLayers.Format.GPX()
 }),
 style: {strokeColor: "green", strokeWidth: 5, strokeOpacity: 0.5},
