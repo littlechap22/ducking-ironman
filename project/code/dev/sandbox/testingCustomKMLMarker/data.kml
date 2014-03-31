@@ -1,0 +1,27 @@
+<kml xmlns="http://earth.google.com/kml/2.0">
+<Document>
+
+<Placemark>
+  <Style>
+    <IconStyle>
+      <Icon>
+        <href>http://maps.google.com/mapfiles/marker_white.png</href>
+      </Icon>
+    </IconStyle>
+  </Style>
+  <name>gps_-122.088490314079,47.6311816629061</name><Point><coordinates>-122.088490314079,47.6311816629061</coordinates></Point>
+</Placemark>
+
+<Placemark>
+  <Style>
+    <IconStyle>
+      <Icon>
+        <href>http://maps.google.com/mapfiles/marker_green.png</href>
+      </Icon>
+    </IconStyle>
+  </Style>
+  <name>gps_-122.08841164108,47.6310305621142</name><Point><coordinates>-122.08841164108,47.6310305621142</coordinates></Point>
+</Placemark>
+
+</Document>
+</kml>
