@@ -3667,6 +3667,160 @@
                 "tiger:zip_left": 98052,
                 "tiger:zip_right": 98052
             }
+        },
+        {
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -122.0888896,
+                    47.6280737
+                ]
+            },
+            "type": "Feature",
+            "properties": {
+                "highway": "mini_roundabout"
+            }
+        },
+        {
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -122.0927985,
+                    47.6223651
+                ]
+            },
+            "type": "Feature",
+            "properties": {
+                "highway": "turning_circle"
+            }
+        },
+        {
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -122.0921198,
+                    47.623622
+                ]
+            },
+            "type": "Feature",
+            "properties": {
+                "highway": "turning_circle"
+            }
+        },
+        {
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -122.0931346,
+                    47.6278937
+                ]
+            },
+            "type": "Feature",
+            "properties": {
+                "highway": "turning_circle"
+            }
+        },
+        {
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -122.0896788,
+                    47.627116
+                ]
+            },
+            "type": "Feature",
+            "properties": {
+                "highway": "turning_circle"
+            }
+        },
+        {
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -122.0903548,
+                    47.6279342
+                ]
+            },
+            "type": "Feature",
+            "properties": {
+                "highway": "turning_circle"
+            }
+        },
+        {
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -122.0903365,
+                    47.6305738
+                ]
+            },
+            "type": "Feature",
+            "properties": {
+                "highway": "turning_circle"
+            }
+        },
+        {
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -122.1165366,
+                    47.6509942
+                ]
+            },
+            "type": "Feature",
+            "properties": {
+                "highway": "crossing"
+            }
+        },
+        {
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -122.1078894,
+                    47.6460231
+                ]
+            },
+            "type": "Feature",
+            "properties": {
+                "highway": "crossing"
+            }
+        },
+        {
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -122.1040721,
+                    47.6422937
+                ]
+            },
+            "type": "Feature",
+            "properties": {
+                "highway": "crossing"
+            }
+        },
+        {
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -122.1079208,
+                    47.6461829
+                ]
+            },
+            "type": "Feature",
+            "properties": {
+                "highway": "crossing"
+            }
+        },
+        {
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -122.0869286,
+                    47.6287525
+                ]
+            },
+            "type": "Feature",
+            "properties": {}
         }
     ],
     "bbox": [

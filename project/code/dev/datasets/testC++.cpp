@@ -1,5 +1,6 @@
 #include<algorithm>
 #include<cctype>
+#include<cstdio>
 #include<cstring>
 #include<fstream>
 #include<functional>
@@ -14,9 +15,19 @@
 #include<vector>
 
 #include</var/www/project/code/dev/datasets/headers/UTM.h>
-#include</var/www/project/code/dev/datasets/rapidjson/document.h>
-//#include<./headers/UTM.h>
+
+#include</var/www/project/code/dev/datasets/headers/document.h>
+#include</var/www/project/code/dev/datasets/headers/filestream.h>
+#include</var/www/project/code/dev/datasets/headers/prettywriter.h>
+#include</var/www/project/code/dev/datasets/headers/rapidjson.h>
+#include</var/www/project/code/dev/datasets/headers/reader.h>
+#include</var/www/project/code/dev/datasets/headers/stringbuffer.h>
+#include</var/www/project/code/dev/datasets/headers/writer.h>
+
+using namespace rapidjson;
 using namespace std;
+
+bool IsPointOnSegment( double x1, double y1, double x2, double y2, double x0, double y0);
 
 //TODO: move to string library
 std::vector<std::string> &split(const std::string &s, char delim, std::vector<std::string> &elems) {
@@ -53,140 +64,48 @@ static inline std::string &trim(std::string &s) {
 	return ltrim(rtrim(s));
 }
 
-int main() {
-        cout << std::setprecision(std::numeric_limits<long double>::digits10);
-        cout << std::setprecision(std::numeric_limits<double>::digits10);
+void ConvertRoadSegmentsDataToUTM(double roadSegments[10000][4], int roadSegmentsSize, double roadSegmentsUTM[10000][4], char UTMZone[50]) {
 
-
-	std::ifstream ifs("road.json");
-	std:string content( (std::istreambuf_iterator<char>(ifs) ), 
-				(std::istreambuf_iterator<char>() ));
-
-	cout << content << "\n";
-	exit(0);
-
-
-	ifstream file;
-	char gpsFilename[25] = "gps_data.txt";
-	file.open(gpsFilename);
-
-	if(!file) {
-		cout << "Error: No input file: " << gpsFilename << "\n";
-		return 1;
-	}
-
-	long double gpsLatLng[10000][2];
-	double gpsUTM[10000][2];
-
-	int col = 0;
-	double lat;
-	double lng;
-
-	char UTMZone[50];
-
-	const char *n;
-	char **endPtr = NULL;
-	string num;
-	string line;
-
-	int i = 0;
-	
-	///while(!infile.eof()) {
-	for(i = 0; i < 7531; i++) {
-		getline(file, line);
-		std::vector<std::string> x = split(line, '\t');
-
-		for(int j = 2; j < 4; j++) {
-			n = x[j].c_str();
-			gpsLatLng[i][col] = strtold(n, endPtr);
-			col++;
-		}
-		UTM::LLtoUTM(gpsLatLng[i][0], gpsLatLng[i][1], gpsUTM[i][0], gpsUTM[i][1], UTMZone);
-		col = 0;
-	}
-	int size_gpsUTM = i;
-
-	file.close();
-
-
-	char roadFilename[25] = "road_network.txt";
-	file.open(roadFilename);
-
-	if(!file) {
-		cout << "Error: No input file: " << roadFilename << "\n";
-		return 1;
-	}
-
-	char unwantedChars[] = "LINESTRING()";
-	string segment;
-	
-	//TODO: create dynamic memory allocation
-	double roadSegments[100000][4];
-	int index = 0;
-
-	//for(int i = 0; i < 158167; i++) {
-	for(int i = 0; i < 10000; i++) {
-		getline(file, line);
-		std::vector<std::string> x = split(line, '\t');
-
-		segment = x[6];
-		for(int j = 0; j < strlen(unwantedChars); j++) {
-			segment.erase(std::remove(segment.begin(), segment.end(), unwantedChars[j]), segment.end());
-		}
-		std::vector<std::string> smallerSegments = split(segment, ',');
-
-		for(int j = 0; j < smallerSegments.size() - 1; j++) {
-			std::vector<std::string> startLngLat = split(trim(smallerSegments[j]), ' ');
-			std::vector<std::string> endLngLat = split(trim(smallerSegments[j+1]), ' ');
-
-			roadSegments[index][0] = atof(startLngLat[1].c_str());
-			roadSegments[index][1] = atof(startLngLat[0].c_str());
-			roadSegments[index][2] = atof(endLngLat[1].c_str());
-			roadSegments[index][3] = atof(endLngLat[0].c_str());
-			index++;
-		}
-	}
-	file.close();
-	int size_roadSegments = index;
-
-	//cout << size_roadSegments << "\n";
-
-	double roadSegmentsUTM[10000][4];
-
-	for(int i = 0; i < size_roadSegments && i < 10000; i++) {
-	      //cout << roadSegments[i][0] << " " << roadSegments[i][1] << " " << roadSegments[i][2] << " " <<  roadSegments[i][3] << "\n";
+	for(int i = 0; i < roadSegmentsSize; i++) {
 	      UTM::LLtoUTM(roadSegments[i][0], roadSegments[i][1], roadSegmentsUTM[i][0], roadSegmentsUTM[i][1], UTMZone);
-
 	      UTM::LLtoUTM(roadSegments[i][2], roadSegments[i][3], roadSegmentsUTM[i][2], roadSegmentsUTM[i][3], UTMZone);
-
-	      //for(int k = 0; k < 4; k++) {
-	      //        cout << roadSegments[i][k] << " ";
-	      //}
-	      //cout << "\n";
-
-	      //for(int k = 0; k < 4; k++) {
-	      //        cout << roadSegmentsUTM[i][k] << " ";
-	      //}
-	      //cout << "\n";
 	}
+}
 
-	int size_roadSegmentsUTM = i;
+void ConvertToUTM(long double gpsLatLng[10000][2], int gpsLatLngSize, double gpsUTM[10000][2], char UTMZone[50]) {
+	
+	for(int i = 0; i < gpsLatLngSize; i++) {
+		UTM::LLtoUTM(gpsLatLng[i][0], gpsLatLng[i][1], gpsUTM[i][0], gpsUTM[i][1], UTMZone);
+	}
+}
 
-	double x0, y0, x1, y1, x2, y2, p, q;
+bool IsPointOnSegment(double start_x, double start_y, double end_x, double end_y,
+		double point_x, double point_y) {
+	double dx = end_x - start_x;
+	double dy = end_y - start_y;
+	double innerProduct = (point_x - start_x)*dx + (point_y - start_y)*dy;
+	return 0 <= innerProduct && innerProduct <= dx*dx + dy*dy;
+}
+
+void MapMatchGPSPoints(double gpsUTM[10000][2], int gpsLatLngSize, double roadSegmentsUTM[10000][4], 
+						int roadSegmentsSize, double projection[10000][3]) {
+	long double min = 10000000;
+	double x0, y0;
+	double x1, y1;
+	double x2, y2;
+	double p;
+	double q;
 
 	double dist;
 	double m;
 	double b;
 
-	double projection[100000][3];
-	long int min = 10000000;
-
-	for(int i = 0; i < size_gpsUTM; i++) {
+	for(int i = 0; i < gpsLatLngSize; i++) {
 
 		p = gpsUTM[i][0];
 		q = gpsUTM[i][1];
 
-		for(int j = 0; j < size_roadSegmentsUTM; j++) {
+		for(int j = 0; j < roadSegmentsSize; j++) {
 
 			x1 = roadSegmentsUTM[j][0];
 			y1 = roadSegmentsUTM[j][1];
@@ -202,8 +121,9 @@ int main() {
 
 			dist = abs(q - m*p - b) / sqrt(m*m + 1);
 
+			bool isPointValid = IsPointOnSegment(x1, y1, x2, y2, x0, y0);
 
-			if(dist < min) {
+			if((dist < min) && isPointValid) {
 				min = dist;
 				projection[i][0] = j;
 				projection[i][1] = x0;
@@ -212,57 +132,223 @@ int main() {
 		}
 		min = 10000000;
 	}
+}
 
-	double output[10000][2];
+void DisplayOutputAsKML(double a[10000][2], int aSize, bool isInput) {
+	
+	cout << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+	cout << "<kml xmlns=\"http://earth.google.com/kml/2.0\">\n";
+	cout << "<Document>\n";
+	cout << "\n";
 
-	for(int i = 0; i < size_gpsUTM; i++) {
-		
-		//cout << projection[i][1] << " " << projection[i][2] << "\n";
-		UTM::UTMtoLL(projection[i][1], projection[i][2], UTMZone, output[i][0], output[i][1]);
+	for(int i = 0; i < aSize; i++) {
+		cout << "<Placemark>";
+		cout << "<Style><IconStyle><Icon><href>";
+		if(isInput) {
+			cout << "http://maps.google.com/mapfiles/marker_white.png";
+		} else {
+			cout << "http://maps.google.com/mapfiles/marker_green.png";
+		}
+		cout << "</href></Icon></IconStyle></Style>";
+		cout << "<name>" << "gps_" << a[i][1] << "," << a[i][0] << "</name><Point><coordinates>" << a[i][1] << "," << a[i][0] << "</coordinates></Point></Placemark>\n";
 	}
 	
-	//cout << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
-	//cout << "<kml xmlns=\"http://earth.google.com/kml/2.0\">\n";
-	//cout << "<Document>\n";
-	//cout << "\n";
+	cout << "\n";
+	cout << "</Document>\n";
+	cout << "</kml>\n";
+}
 
-	//int oldIndex = -1;
-
-	//for(int i = 0; i < size_gpsUTM; i++) {
-	//	int index = projection[i][0];
-	//	if(index != oldIndex) {
-	//		cout << "<Placemark><name>" << "roadSegment" << rand() % 1000 << "</name><Point><coordinates>" << roadSegments[index][1] << "," << roadSegments[index][0] << "</coordinates></Point></Placemark>\n";
-	//		cout << "<Placemark><name>" << "roadSegment" << rand() % 1000 << "</name><Point><coordinates>" << roadSegments[index][3] << "," << roadSegments[index][2] << "</coordinates></Point></Placemark>\n";
-	//	}
-	//	oldIndex = index;
-	//}
-
-	//cout << "\n";
-	//cout << "</Document>\n";
-	//cout << "</kml>\n";
+void DisplayOutputAsKML(long double a[10000][2], int aSize, bool isInput) {
 
 	cout << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
 	cout << "<kml xmlns=\"http://earth.google.com/kml/2.0\">\n";
 	cout << "<Document>\n";
 	cout << "\n";
 
-	for(int i = 0; i < size_gpsUTM; i++) {
-		cout << "<Placemark><name>" << "gps_" << gpsLatLng[i][1] << "," << gpsLatLng[i][0]  << "</name><Point><coordinates>" << gpsLatLng[i][1] << "," << gpsLatLng[i][0] << "</coordinates></Point></Placemark>\n";
-		//cout << "<Placemark><name>" << "gps" << rand() % 1000 << "</name><Point><coordinates>" << output[i][1] << "," << output[i][0] << "</coordinates></Point></Placemark>\n";
+	for(int i = 0; i < aSize; i++) {
+		cout << "<Placemark>";
+		cout << "<Style><IconStyle><Icon><href>";
+		if(isInput) {
+			cout << "http://maps.google.com/mapfiles/marker_white.png";
+		} else {
+			cout << "http://maps.google.com/mapfiles/marker_green.png";
+		}
+		cout << "</href></Icon></IconStyle></Style>";
+		cout << "<name>" << "gps_" << a[i][1] << "," << a[i][0] << "</name><Point><coordinates>" << a[i][1] << "," << a[i][0] << "</coordinates></Point></Placemark>\n";
 	}
 	
 	cout << "\n";
 	cout << "</Document>\n";
 	cout << "</kml>\n";
-	
-	//ofstream outputFile;
-	//outputFile.open("gpsCorrected.kml");
-	//std::cout.precision(10);	
-	//for(int i = 0; i < size_gpsUTM; i++) {
+}
 
-	//	outputFile << "<Placemark><name>" << rand() % 1000 << "</name><Point><coordinates>" << gpsLatLng[i][0] << "," << gpsLatLng[i][1] << "</coordinates></Point></Placemark>\n";
-	//	outputFile << "<Placemark><name>" << rand() % 1000 << "</name><Point><coordinates>" << output[i][0] << "," << output[i][1] << "</coordinates></Point></Placemark>\n";
-	//}
-	//outputFile.close();
+void DisplayRoadSegmentsAsKML(double a[10000][4], int aSize) {
+
+	cout << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+	cout << "<kml xmlns=\"http://earth.google.com/kml/2.0\">\n";
+	cout << "<Document>\n";
+	cout << "\n";
+
+	for(int i = 0; i < aSize; i++) {
+		cout << "<Placemark>";
+		cout << "<Style><IconStyle><Icon><href>";
+		cout << "http://maps.google.com/mapfiles/marker_white.png";
+		cout << "</href></Icon></IconStyle></Style>";
+		cout << "<name>" << "gps_" << a[i][1] << "," << a[i][0] << "</name><Point><coordinates>" << a[i][1] << "," << a[i][0] << "</coordinates></Point></Placemark>\n";
+		
+		cout << "<Placemark>";
+		cout << "<Style><IconStyle><Icon><href>";
+		cout << "http://maps.google.com/mapfiles/marker_white.png";
+		cout << "</href></Icon></IconStyle></Style>";
+		cout << "<name>" << "gps_" << a[i][3] << "," << a[i][2] << "</name><Point><coordinates>" << a[i][3] << "," << a[i][2] << "</coordinates></Point></Placemark>\n";
+		cout << "\n";
+	}
+	
+	cout << "\n";
+	cout << "</Document>\n";
+	cout << "</kml>\n";
+}
+
+int ReadGPSDataIntoArray(long double gpsLatLng[10000][2], char filename[25]) {
+
+	ifstream file;
+	file.open(filename);
+
+	if(!file) {
+		cout << "Error: No input file: " << filename << "\n";
+		return 1;
+	}
+
+	int col = 0;
+	int i = 0;
+	string line;
+	const char *n;
+	char **endPtr = NULL;
+
+	for(i = 0; i < 7531; i++) {
+		getline(file, line);
+		std::vector<std::string> x = split(line, '\t');
+
+		for(int j = 2; j < 4; j++) {
+			n = x[j].c_str();
+			gpsLatLng[i][col] = strtold(n, endPtr);
+			col++;
+		}
+		col = 0;
+	}
+	file.close();
+	return i;
+
+}
+
+int ReadRoadSegmentsDataIntoArray(double roadSegments[100000][4], char filename[25], string format) {
+
+	int index = 0;
+	if(format == "text") {
+		ifstream file;
+		file.open(filename);
+
+		if(!file) {
+			cout << "Error: No input file: " << filename << "\n";
+			return 1;
+		}
+
+		char unwantedChars[] = "LINESTRING()";
+		string line;
+		string segment;
+		
+		for(int i = 0; i < 10000; i++) {
+			getline(file, line);
+			std::vector<std::string> x = split(line, '\t');
+	
+			segment = x[6];
+			for(int j = 0; j < strlen(unwantedChars); j++) {
+				segment.erase(std::remove(segment.begin(), segment.end(), unwantedChars[j]), segment.end());
+			}
+			std::vector<std::string> smallerSegments = split(segment, ',');
+	
+			for(int j = 0; j < smallerSegments.size() - 1; j++) {
+				std::vector<std::string> startLngLat = split(trim(smallerSegments[j]), ' ');
+				std::vector<std::string> endLngLat = split(trim(smallerSegments[j+1]), ' ');
+
+				roadSegments[index][0] = atof(startLngLat[1].c_str());
+				roadSegments[index][1] = atof(startLngLat[0].c_str());
+				roadSegments[index][2] = atof(endLngLat[1].c_str());
+				roadSegments[index][3] = atof(endLngLat[0].c_str());
+				index++;
+			}
+		}
+		file.close();
+
+	} else if (format == "json") {
+	
+		std::ifstream ifs(filename);
+		std:string json( (std::istreambuf_iterator<char>(ifs) ), (std::istreambuf_iterator<char>() ));
+
+		rapidjson::Document jsonObj;
+		jsonObj.Parse<0>(json.c_str());
+
+		const Value& features = jsonObj["features"];
+
+		for(SizeType p = 0; p < features.Size(); p++) {
+			const Value& feature = features[p]["geometry"];
+			const Value& nodes = feature["coordinates"];
+		
+			for(SizeType q = 0; q < nodes.Size()-1; q++) {
+				const Value& nodeLngLatStart = nodes[q];
+				const Value& nodeLngLatEnd = nodes[q+1];
+				roadSegments[index][0] = nodeLngLatStart[1].GetDouble();
+				roadSegments[index][1] = nodeLngLatStart[SizeType(0)].GetDouble();
+				roadSegments[index][2] = nodeLngLatEnd[1].GetDouble();
+				roadSegments[index][3] = nodeLngLatEnd[SizeType(0)].GetDouble();
+
+				index++;
+			}
+		}	
+	}
+	return index;
+}
+
+void SetPrecisionLimits() {
+	cout << std::setprecision(std::numeric_limits<long double>::digits10);
+        cout << std::setprecision(std::numeric_limits<double>::digits10);
+}
+
+
+int main() {
+
+	SetPrecisionLimits();
+
+	long double gpsLatLng[10000][2];	
+	char filename[25] = "gps_data.txt";
+	int gpsLatLngSize = ReadGPSDataIntoArray(gpsLatLng, filename);
+
+
+	double gpsUTM[10000][2];
+	char UTMZone[50];
+	ConvertToUTM(gpsLatLng, gpsLatLngSize, gpsUTM, UTMZone);
+
+
+	double roadSegments[100000][4];
+	string format = "json";
+	char roadFilename[25] = "road.json";
+	int roadSegmentsSize = ReadRoadSegmentsDataIntoArray(roadSegments, roadFilename, format);
+
+
+	double roadSegmentsUTM[10000][4];
+	ConvertRoadSegmentsDataToUTM(roadSegments, roadSegmentsSize, roadSegmentsUTM, UTMZone);
+
+
+	double projection[100000][3];
+	MapMatchGPSPoints(gpsUTM, gpsLatLngSize, roadSegmentsUTM, roadSegmentsSize, projection);
+
+
+	double output[10000][2];
+	for(int i = 0; i < gpsLatLngSize; i++) {
+		UTM::UTMtoLL(projection[i][1], projection[i][2], UTMZone, output[i][0], output[i][1]);
+	}
+	
+	DisplayOutputAsKML(output, gpsLatLngSize, false);
+	
 	return 0;
 }
